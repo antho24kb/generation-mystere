@@ -42,6 +42,73 @@ const bank=[
 ['Technologie','Est-ce que tu as connu l’arrivée des smartphones tactiles ?','Choisis la période qui correspond à ton expérience.','📲','Le smartphone tactile',2010]
 ].map(x=>({cat:x[0],q:x[1],hint:x[2],icon:x[3],name:x[4],year:x[5]}));
 const stages=[{label:'C’était ma vie, j’étais accro !',sub:'Impossible de passer une journée sans',age:9,emoji:'🤩'},{label:'J’ai testé… et j’ai bien aimé',sub:'J’ai connu, sans devenir un(e) fan absolu(e)',age:14,emoji:'😎'},{label:'Je vois très bien, mais de loin',sub:'C’était surtout chez les copains / à la télé',age:20,emoji:'🧐'},{label:'Alors là… jamais entendu parler !',sub:'Cette référence ne me dit vraiment rien',age:null,emoji:'🤷'}];
+const answerSets={
+'Télévision':[
+['C’était mon rendez-vous !','Je ne voulais surtout pas rater un épisode','🤩'],
+['Je regardais de temps en temps','Je tombais dessus quand ça passait','😎'],
+['Je connais, mais je regardais peu','J’en ai surtout entendu parler','🧐'],
+['Jamais regardé !','Cette émission ou série ne me dit rien','🤷']],
+'Dessins animés':[
+['J’étais devant à chaque épisode !','Le générique est encore dans ma tête','🤩'],
+['Je regardais quand ça passait','Quelques épisodes par-ci par-là','😎'],
+['Je connais le dessin animé','Mais je ne le suivais pas vraiment','🧐'],
+['Inconnu au bataillon !','Je ne l’ai jamais regardé','🤷']],
+'Jeux vidéo':[
+['J’y ai passé des heures !','Je connaissais les jeux par cœur','🤩'],
+['J’ai joué quelques fois','Chez moi ou chez des amis','😎'],
+['J’ai surtout regardé les autres jouer','Je connais de nom ou de vue','🧐'],
+['Je n’ai jamais connu cette console / ce jeu','Ça ne me parle pas','🤷']],
+'Objets cultes':[
+['J’en avais un !','Je l’utilisais tout le temps','🤩'],
+['J’en ai utilisé de temps en temps','J’en ai eu un entre les mains','😎'],
+['J’en ai déjà vu un','Mais je ne l’ai jamais utilisé','🧐'],
+['Jamais vu ça !','Je découvre complètement','🤷']],
+'Internet':[
+['J’y étais tous les jours !','C’était un passage obligé','🤩'],
+['J’ai eu un compte / je l’ai utilisé','Mais pas très longtemps','😎'],
+['Je connais le nom','Sans vraiment m’en être servi','🧐'],
+['Jamais utilisé !','Je ne connaissais même pas','🤷']],
+'Cour de récré':[
+['C’était la grande mode avec moi !','J’en avais et j’en parlais tout le temps','🤩'],
+['J’en ai eu quelques-uns','J’ai participé un peu à la mode','😎'],
+['J’ai vu les autres en avoir','Mais je n’étais pas dedans','🧐'],
+['Je n’ai pas connu cette mode','Aucun souvenir de ça','🤷']],
+'Cinéma':[
+['Je l’ai découvert dès sa sortie !','J’étais à fond dans la saga','🤩'],
+['Je l’ai vu plus tard','Et j’ai plutôt bien accroché','😎'],
+['Je connais les films','Mais je ne les ai pas vraiment suivis','🧐'],
+['Je ne connais pas cette saga','Je ne l’ai jamais regardée','🤷']],
+'Musique':[
+['C’était mon quotidien !','Je faisais mes compilations moi-même','🤩'],
+['Je l’ai fait quelques fois','J’ai connu cette habitude','😎'],
+['J’en ai vu autour de moi','Mais je ne le faisais pas','🧐'],
+['Jamais fait ça !','Je n’ai pas connu cette époque','🤷']],
+'Jouets':[
+['J’en avais un, évidemment !','Je m’en occupais tout le temps','🤩'],
+['J’en ai eu / essayé un','Mais sans être accro','😎'],
+['J’en ai vu chez les autres','Sans en avoir moi-même','🧐'],
+['Jamais connu ce jouet','Il ne me dit rien','🤷']],
+'Téléphonie':[
+['J’en utilisais un à la maison','C’était notre téléphone de tous les jours','🤩'],
+['Je m’en suis servi parfois','Je connais bien cette habitude','😎'],
+['J’en ai vu chez les autres','Mais ce n’était pas mon quotidien','🧐'],
+['Je n’ai pas connu ça','Ça ne me parle pas','🤷']],
+'Technologie':[
+['J’en avais un !','Je l’utilisais régulièrement','🤩'],
+['J’ai connu et utilisé','Mais pas pendant très longtemps','😎'],
+['Je connais cet appareil','Sans l’avoir vraiment utilisé','🧐'],
+['Jamais connu !','Je découvre complètement','🤷']],
+'Culture pop':[
+['J’étais fan !','J’ai suivi ça dès le début','🤩'],
+['J’ai regardé / suivi un peu','J’ai bien aimé sans être fan','😎'],
+['Je connais l’univers','Mais je n’ai pas vraiment suivi','🧐'],
+['Ça ne me dit rien','Je ne connais pas','🤷']]
+};
+const defaultAnswers=[
+['C’était ma vie, j’étais accro !','Impossible de passer une journée sans','🤩'],
+['J’ai testé… et j’ai bien aimé','J’ai connu, sans devenir fan absolu','😎'],
+['Je vois très bien, mais de loin','C’était surtout chez les copains / à la télé','🧐'],
+['Alors là… jamais entendu parler !','Cette référence ne me dit rien','🤷']];
 const $=id=>document.getElementById(id);let questions=[],index=0,answers=[];const TOTAL_QUESTIONS=20;
 function show(id){['home','game','result'].forEach(x=>$(x).classList.toggle('hidden',x!==id));window.scrollTo({top:0,behavior:'auto'});}
 function answerLikelihood(ageAtRelease,answer){
@@ -84,7 +151,7 @@ function pickAdaptiveQuestion(){
   return pool[Math.floor(Math.random()*Math.min(3,pool.length))];
 }
 function start(){questions=[...bank].sort(()=>Math.random()-.5).slice(0,5);index=0;answers=Array(TOTAL_QUESTIONS).fill(null);show('game');render();}
-function render(){const q=questions[index],pct=Math.round((index+1)/TOTAL_QUESTIONS*100);$('counter').textContent='QUESTION '+(index+1)+' / '+TOTAL_QUESTIONS;$('percent').textContent=pct+' %';$('progress').style.width=pct+'%';$('category').textContent=q.cat;$('question').textContent=q.q;$('hint').textContent=q.hint;$('reficon').textContent=q.icon;$('refname').textContent=q.name;$('refyear').textContent='';$('answers').replaceChildren();stages.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='answer'+(answers[index]===i?' selected':'');b.innerHTML='<span class="emoji">'+s.emoji+'</span><span>'+s.label+'<small>'+s.sub+'</small></span>';b.addEventListener('click',()=>{answers[index]=i;renderAnswers();});$('answers').appendChild(b);});$('back').style.visibility=index===0?'hidden':'visible';$('next').disabled=answers[index]===null;$('next').textContent=index===TOTAL_QUESTIONS-1?'Découvrir mon âge ✨':'Suivant →';}
+function render(){const q=questions[index],pct=Math.round((index+1)/TOTAL_QUESTIONS*100);$('counter').textContent='QUESTION '+(index+1)+' / '+TOTAL_QUESTIONS;$('percent').textContent=pct+' %';$('progress').style.width=pct+'%';$('category').textContent=q.cat;$('question').textContent=q.q;$('hint').textContent=q.hint;$('reficon').textContent=q.icon;$('refname').textContent=q.name;$('refyear').textContent='';$('answers').replaceChildren();const choices=answerSets[q.cat]||defaultAnswers;choices.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.className='answer'+(answers[index]===i?' selected':'');b.innerHTML='<span class="emoji">'+s[2]+'</span><span>'+s[0]+'<small>'+s[1]+'</small></span>';b.addEventListener('click',()=>{answers[index]=i;renderAnswers();});$('answers').appendChild(b);});$('back').style.visibility=index===0?'hidden':'visible';$('next').disabled=answers[index]===null;$('next').textContent=index===TOTAL_QUESTIONS-1?'Découvrir mon âge ✨':'Suivant →';}
 function renderAnswers(){[...$('answers').children].forEach((b,i)=>b.classList.toggle('selected',answers[index]===i));$('next').disabled=answers[index]===null;}
 function result(){const estimates=[];let unknown=0;questions.forEach((q,i)=>{const a=answers[i];if(a===3||a===null){unknown++;return;}estimates.push(q.year-stages[a].age);});if(!estimates.length){$('age').textContent='? ans';$('generation').textContent='MYSTÈRE TOTAL';$('birth').textContent='Impossible à estimer';$('description').textContent='Tes souvenirs sont bien cachés ! Rejoue avec d’autres références.';$('confidence').textContent='Il nous faut quelques réponses connues pour tenter une estimation.';$('resultemoji').textContent='🕵️';show('result');return;}const vals=estimates.sort((a,b)=>a-b);let birth=estimateBirth();birth=Math.max(1960,Math.min(2015,birth));const age=new Date().getFullYear()-birth;let gen,desc,emo;if(birth<1970){gen='GÉNÉRATION 60';desc='Tu as grandi avec les grandes révolutions de la télévision, de la musique et des loisirs.';emo='📻';}else if(birth<1980){gen='GÉNÉRATION 70';desc='Les objets analogiques, les émissions cultes et les premières consoles font partie de tes souvenirs.';emo='📼';}else if(birth<1990){gen='GÉNÉRATION 80';desc='Tu as connu la pop culture des années 80 et 90, les cassettes, les dessins animés et les jeux vidéo cultes.';emo='🕹️';}else if(birth<2000){gen='GÉNÉRATION 90';desc='Tu as grandi pendant le grand virage : Pokémon, consoles, CD gravés et arrivée d’Internet.';emo='💿';}else if(birth<2010){gen='GÉNÉRATION 2000';desc='Tu as grandi avec les messageries, les blogs, les lecteurs MP3 et une pop culture mondiale.';emo='🎧';}else{gen='GÉNÉRATION 2010';desc='Tu as grandi dans un monde connecté, entre vidéos en ligne, jeux multijoueurs et culture mobile.';emo='📱';}$('age').textContent=age+' ans';$('generation').textContent=gen;$('birth').textContent='Naissance estimée : '+birth;$('description').textContent=desc;$('resultemoji').textContent=emo;const spread=vals.length>1?vals[vals.length-1]-vals[0]:99;const level=estimates.length>=12&&spread<=12?'Plusieurs souvenirs concordent':estimates.length>=7?'Estimation indicative':'Estimation très approximative';$('confidence').textContent=level+' · Basée sur '+estimates.length+' réponses exploitables et '+unknown+' référence(s) inconnue(s). C’est un jeu, pas une mesure scientifique.';show('result');}
 function toast(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2400);}
