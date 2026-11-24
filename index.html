@@ -41,7 +41,7 @@ const bank=[
 ['Télévision','Est-ce que tu utilisais les programmes à la demande ?','Choisir son programme sans attendre sa diffusion.','📺','La télévision en replay',2010],
 ['Technologie','Est-ce que tu as connu l’arrivée des smartphones tactiles ?','Choisis la période qui correspond à ton expérience.','📲','Le smartphone tactile',2010]
 ].map(x=>({cat:x[0],q:x[1],hint:x[2],icon:x[3],name:x[4],year:x[5]}));
-const stages=[{label:'Je l’ai beaucoup utilisé / regardé',sub:'Ça faisait partie de mon quotidien',age:9,emoji:'🔥'},{label:'Je l’ai utilisé de temps en temps',sub:'Je m’en servais occasionnellement',age:14,emoji:'🙂'},{label:'Je connais, mais je l’ai peu utilisé',sub:'Je connais la référence',age:20,emoji:'👀'},{label:'Je ne connais pas / je ne m’en souviens pas',sub:'Cette référence ne me parle pas',age:null,emoji:'🤷'}];
+const stages=[{label:'C’était ma vie, j’étais accro !',sub:'Impossible de passer une journée sans',age:9,emoji:'🤩'},{label:'J’ai testé… et j’ai bien aimé',sub:'J’ai connu, sans devenir un(e) fan absolu(e)',age:14,emoji:'😎'},{label:'Je vois très bien, mais de loin',sub:'C’était surtout chez les copains / à la télé',age:20,emoji:'🧐'},{label:'Alors là… jamais entendu parler !',sub:'Cette référence ne me dit vraiment rien',age:null,emoji:'🤷'}];
 const $=id=>document.getElementById(id);let questions=[],index=0,answers=[];
 function show(id){['home','game','result'].forEach(x=>$(x).classList.toggle('hidden',x!==id));window.scrollTo({top:0,behavior:'auto'});}
 function start(){questions=[...bank].sort(()=>Math.random()-.5).slice(0,20);index=0;answers=Array(questions.length).fill(null);show('game');render();}
