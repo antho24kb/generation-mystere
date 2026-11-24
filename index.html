@@ -68,13 +68,19 @@ function estimateBirth(){const scores=birthScores();if(!scores.length)return nul
 function pickAdaptiveQuestion(){
   const used=new Set(questions.map(q=>q.name));const pool=bank.filter(q=>!used.has(q.name));if(!pool.length)return null;
   const scores=birthScores();if(!scores.length)return pool[Math.floor(Math.random()*pool.length)];
-  const ranked=scores.sort((a,b)=>b.score-a.score).slice(0,12);
-  const center=ranked.reduce((sum,x)=>sum+x.birth,0)/ranked.length;
-  const spread=ranked.reduce((sum,x)=>sum+Math.abs(x.birth-center),0)/ranked.length;
-  pool.sort((a,b)=>{
-    const score=q=>{const ages=ranked.map(x=>q.year-x.birth);const mean=ages.reduce((s,x)=>s+x,0)/ages.length;const variance=ages.reduce((s,x)=>s+(x-mean)**2,0)/ages.length;return variance+Math.abs(mean-16)*.15;};
-    return score(b)-score(a);
-  });
+  const candidates=scores.sort((a,b)=>b.score-a.score).slice(0,16);
+  const entropy=p=>-p.reduce((sum,x)=>sum+(x>0?x*Math.log(x):0),0);
+  const informationGain=q=>{
+    const distributions=candidates.map(candidate=>{
+      const age=q.year-candidate.birth;
+      const likelihoods=[0,1,2,3].map(answer=>answerLikelihood(age,answer));
+      const total=likelihoods.reduce((s,x)=>s+x,0);
+      return likelihoods.map(x=>x/total);
+    });
+    const average=[0,1,2,3].map(i=>distributions.reduce((s,p)=>s+p[i],0)/distributions.length);
+    return entropy(average)-distributions.reduce((s,p)=>s+entropy(p),0)/distributions.length;
+  };
+  pool.sort((a,b)=>informationGain(b)-informationGain(a));
   return pool[Math.floor(Math.random()*Math.min(3,pool.length))];
 }
 function start(){questions=[...bank].sort(()=>Math.random()-.5).slice(0,5);index=0;answers=Array(TOTAL_QUESTIONS).fill(null);show('game');render();}
